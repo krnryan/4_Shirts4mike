@@ -2,6 +2,8 @@
 require_once('../inc/config.php');
 require_once(ROOT_PATH.'inc/products.php');
 
+$products = get_products_all();
+
 $pageTitle = "Mike's Full Catalog of Shirts";
 $section = "shirts";
 include(ROOT_PATH.'inc/header.php'); ?>

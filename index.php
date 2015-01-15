@@ -1,8 +1,11 @@
 <?php
+require_once('inc/config.php');
+include(ROOT_PATH.'inc/products.php'); 
+
 $pageTitle = "Unique T-shirts designed by a frog";
 $section = "";
+$recent = get_products_recent();
 
-require_once('inc/config.php');
 include(ROOT_PATH.'inc/header.php'); ?>
 
 		<div class="section banner">
@@ -26,19 +29,13 @@ include(ROOT_PATH.'inc/header.php'); ?>
 
 				<h2>Mike&rsquo;s Latest Shirts</h2>
 
-				<?php include('inc/products.php'); ?>
                 <ul class="products">
-					<?php 
-                    $total_products = count($products);
-                    $position = 0;
-                    $list_view_html = "";
-                    foreach($products as $product) { 
-                            $position++;
-                            if ($total_products - $position < 4) {
-                                $list_view_html = get_list_view_html($product) . $list_view_html;
-                            }
-						}
-                    echo $list_view_html;
+					<?php
+                        $list_view_html = "";
+                        foreach($recent as $product) { 
+                            $list_view_html = get_list_view_html($product) . $list_view_html;
+                        }
+                        echo $list_view_html;
 					?>
 				</ul>
 
