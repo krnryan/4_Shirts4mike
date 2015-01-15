@@ -1,10 +1,10 @@
 <?php
 
-function get_list_view_html($product_id, $product) {
+function get_list_view_html($product) {
 
     $output = "";
     $output = $output."<li>";
-    $output = $output.'<a href="'.BASE_URL.'shirts/'.$product_id.'/">';
+    $output = $output.'<a href="'.BASE_URL.'shirts/'.$product["sku"].'/">';
     $output = $output.$product['name'];
     $output = $output.'<img src="' . BASE_URL . $product["img"] . '" alt="' . $product["name"] . '">';
     $output = $output."<p>View Details</p>";
@@ -80,4 +80,7 @@ $products[108] = array(
     "styles" => array("Long", "Short")
 );
 
-?>
+
+foreach($products as $product_id => $product) {
+    $products[$product_id]["sku"] = $product_id;
+}
