@@ -31,11 +31,9 @@ include(ROOT_PATH.'inc/header.php'); ?>
 
                 <ul class="products">
 					<?php
-                        $list_view_html = "";
                         foreach($recent as $product) { 
-                            $list_view_html = get_list_view_html($product) . $list_view_html;
+                            include(ROOT_PATH . "inc/partial-product-list-view.html.php");
                         }
-                        echo $list_view_html;
 					?>
 				</ul>
 

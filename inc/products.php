@@ -1,19 +1,10 @@
 <?php
 
-function get_list_view_html($product) {
-
-    $output = "";
-    $output = $output."<li>";
-    $output = $output.'<a href="'.BASE_URL.'shirts/'.$product["sku"].'/">';
-    $output = $output.$product['name'];
-    $output = $output.'<img src="' . BASE_URL . $product["img"] . '" alt="' . $product["name"] . '">';
-    $output = $output."<p>View Details</p>";
-    $output = $output."</a>";
-    $output = $output."</li>";
-
-    return $output;
-}
-
+/*
+ * Returns the four most recent products, using the order of the elements in the array
+ * @return   array           a list of the last four products in the array;
+                             the most recent product is the last one in the array
+ */
 function get_products_recent() {
     $recent = array();
     $all = get_products_all();
@@ -30,19 +21,29 @@ function get_products_recent() {
     return $recent;
 }
 
+/*
+ * Loops through all the products, looking for a search term in the product names
+ * @param    string     $s     the search term
+ * @return   array             a list of the products that contain the search term in their name
+*/
 function get_products_search($search_term) {
     $results = array();
     $all = get_products_all();
     
     foreach($all as $product) {
-        // TODO: if (there's a match) {
+        if (stripos($product["name"], $search_term) !== FALSE) {
             $results[] = $product;
-        //}
+        }
     }
     
     return $results;
 }
 
+/*
+ * Returns the full list of products. This function contains the full list of products,
+ * and the other model functions first call this function.
+ * @return   array           the full list of products
+ */
 function get_products_all() {
     $products = array();
     $products[101] = array(
@@ -269,10 +270,46 @@ function get_products_all() {
             "paypal" => "Y6EQRE445MYYW",
             "sizes" => array("Small","Medium","Large","X-Large")
     );
+    
+    // when creating a new product, create it first in PayPal and
+    // then copy the product ID from PayPal to use here     
+
+    // automated duplication to copy the product_id/sku from the array key
+    // and duplicate it into the product details inside the array
 
     foreach($products as $product_id => $product) {
         $products[$product_id]["sku"] = $product_id;
     }
     
     return $products;
+}
+
+/*
+ * Counts the total number of products
+ * @return   int             the total number of products
+ */
+function get_products_count() {
+    $count = count(get_products_all());
+    return $count;
+}
+
+/*
+ * Returns a specified subset of products, based on the values received,
+ * using the order of the elements in the array .
+ * @param    int             the position of the first product in the requested subset 
+ * @param    int             the position of the last product in the requested subset 
+ * @return   array           the list of products that correspond to the start and end positions
+ */
+function get_products_subset($start, $end) {
+    $subset = array();
+    $all = get_products_all();
+    
+    $position = 0;
+    foreach ($all as $product) {
+        $position += 1;
+        if ($position >= $start && $position <= $end) {
+            $subset[] = $product;
+        }
+    }
+    return $subset;
 }
