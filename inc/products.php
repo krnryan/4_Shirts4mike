@@ -45,7 +45,7 @@ function get_products_search($search_term) {
  * @return   array           the full list of products
  */
 function get_products_all() {
-    $products = array();
+    /*$products = array();
     $products[101] = array(
     	"name" => "Logo Shirt, Red",
     	"img" => "img/shirts/shirt-101.jpg",
@@ -279,7 +279,23 @@ function get_products_all() {
 
     foreach($products as $product_id => $product) {
         $products[$product_id]["sku"] = $product_id;
+    }*/
+    
+    try {
+        $db = new PDO("mysql:host=localhost;dbname=shirts4mike", "root", "");
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->exec("SET NAMES 'utf8'");
+    } catch(Exception $e){
+        echo "Could not connect to the database!";
     }
+    
+    try {
+        $results = $db->query("SELECT name, price, img, paypal, sku FROM products ORDER BY sku ASC");
+    } catch(Exception $e){
+        echo "Could not connect to the database!";
+    }
+    
+    $products = $results->fetchAll(PDO::FETCH_ASSOC);
     
     return $products;
 }
