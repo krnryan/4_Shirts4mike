@@ -6,37 +6,43 @@
                              the most recent product is the last one in the array
  */
 function get_products_recent() {
-    $recent = array();
-    $all = get_products_all();
     
-    $total_products = count($all);
-    $position = 0;
+    require (ROOT_PATH . 'inc/database.php');
     
-    foreach($all as $product) {
-        $position++;
-        if ($total_products - $position < 4) {
-            $recent[] = $product;
-        }
+    try {
+        $results = $db->query("SELECT name, price, img, sku, paypal FROM products ORDER BY sku DESC LIMIT 4");
+    } catch (Exception $e) {
+        echo "Data could not be retrieved from the database.";
+        exit;
     }
+    
+    $recent = $results->fetchAll(PDO::FETCH_ASSOC);
+    $recent = array_reverse($recent);
+    
     return $recent;
 }
 
 /*
- * Loops through all the products, looking for a search term in the product names
+ * Looks for a search term in the product names
  * @param    string     $s     the search term
  * @return   array             a list of the products that contain the search term in their name
 */
 function get_products_search($search_term) {
-    $results = array();
-    $all = get_products_all();
+
+    require (ROOT_PATH . 'inc/database.php');
     
-    foreach($all as $product) {
-        if (stripos($product["name"], $search_term) !== FALSE) {
-            $results[] = $product;
-        }
+    try {
+        $results = $db->prepare("SELECT name, price, img, sku, paypal FROM products WHERE name LIKE ? ORDER BY sku");
+        $results->bindValue(1, "%".$search_term."%");
+        $results->execute();
+    } catch (Exception $e) {
+        echo "Data could not be retrieved from the database.";
+        exit;
     }
     
-    return $results;
+    $matches = $results->fetchAll(PDO::FETCH_ASSOC);
+    
+    return $matches;
 }
 
 /*
@@ -299,8 +305,16 @@ function get_products_all() {
  * @return   int             the total number of products
  */
 function get_products_count() {
-    $count = count(get_products_all());
-    return $count;
+    require (ROOT_PATH . 'inc/database.php');
+    
+    try {
+        $results = $db->query("SELECT COUNT(sku) FROM products");
+    } catch (Exception $e) {
+        echo "Data could not be retrieved from the database.";
+        exit;
+    }
+    
+    return intval($results->fetchColumn(0));
 }
 
 /*
@@ -311,16 +325,24 @@ function get_products_count() {
  * @return   array           the list of products that correspond to the start and end positions
  */
 function get_products_subset($start, $end) {
-    $subset = array();
-    $all = get_products_all();
     
-    $position = 0;
-    foreach ($all as $product) {
-        $position += 1;
-        if ($position >= $start && $position <= $end) {
-            $subset[] = $product;
-        }
+    $offset = $start - 1;
+    $rows = $end - $start + 1;
+    
+    require(ROOT_PATH."inc/database.php");
+    
+    try {
+        $results = $db->prepare("SELECT name, price, img, paypal FROM products ORDER BY sku LIMIT ?, ?");
+        $results->bindParam(1, $offset, PDO::PARAM_INT);
+        $results->bindParam(2, $rows, PDO::PARAM_INT);
+        $results->execute();
+    } catch(Exception $e){
+        echo "Data could not be retrieved from the database.";
+        exit;
     }
+    
+    $subset = $results->fetchAll(PDO::FETCH_ASSOC);
+    
     return $subset;
 }
 
@@ -337,6 +359,23 @@ function get_product_single($sku) {
     }
     
     $product = $results->fetch(PDO::FETCH_ASSOC);
+    
+    $product["sizes"] = array();
+    
+    if ($product === false) return $product;
+        $results = $db->prepare("SELECT size FROM products_sizes ps INNER JOIN sizes s ON ps.size_id = s.id WHERE product_sku = ? ORDER BY `order`");
+        $results->bindParam(1, $sku);
+        $results->execute();
+    try {
+    
+    } catch (Exception $e) {
+        echo "Data could not be retrieved from the database.";
+        exit;
+    }
+    
+    while ($row = $results->fetch(PDO::FETCH_ASSOC)) {
+        $product["sizes"][] = $row["size"]; 
+    }
     
     return $product;
 }
