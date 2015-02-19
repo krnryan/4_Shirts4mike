@@ -281,13 +281,7 @@ function get_products_all() {
         $products[$product_id]["sku"] = $product_id;
     }*/
     
-    try {
-        $db = new PDO("mysql:host=localhost;dbname=shirts4mike", "root", "");
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $db->exec("SET NAMES 'utf8'");
-    } catch(Exception $e){
-        echo "Could not connect to the database!";
-    }
+    require(ROOT_PATH."inc/database.php");
     
     try {
         $results = $db->query("SELECT name, price, img, paypal, sku FROM products ORDER BY sku ASC");
@@ -328,4 +322,21 @@ function get_products_subset($start, $end) {
         }
     }
     return $subset;
+}
+
+function get_product_single($sku) {
+    require(ROOT_PATH."inc/database.php");
+    
+    try {
+        $results = $db->prepare("SELECT name, price, img, paypal, sku FROM products WHERE sku = ?");
+        $results->bindParam(1, $sku);
+        $results->execute();
+    } catch(Exception $e){
+        echo "Could not connect to the database!";
+        exit;
+    }
+    
+    $product = $results->fetch(PDO::FETCH_ASSOC);
+    
+    return $product;
 }
